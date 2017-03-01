@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "beta_predict <- function(p, calib){\n  p <- pmax(1e-16, pmin(p, 1-1e-16))\n  d <- data.frame(p)\n  if (calib$parameters == \"abm\"){\n    d$lp <- log(p)\n    d$l1p <- -log(1-p)\n  }else if (calib$parameters == \"am\"){\n    d$lp <- log(p / (1 - p))\n  }else if (calib$parameters == \"ab\"){\n    d$lp <- log(2 * p)\n    d$l1p <- log(2*(1-p))\n  }\n  return(predict(calib$model, newdata=d, type=\"response\"))\n}\n",
+    "created" : 1487908889370.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "200067980",
+    "id" : "AB6D13A3",
+    "lastKnownWriteTime" : 1487972283,
+    "last_content_update" : 1487972283544,
+    "path" : "C:/Users/tmfilho/Dropbox/Doutorado/Bristol/2017/betacal/master/R/betacal/R/beta_predict.r",
+    "project_path" : "R/beta_predict.r",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

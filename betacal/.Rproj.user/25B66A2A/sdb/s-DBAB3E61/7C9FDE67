@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(ggplot2)\nlibrary(latex2exp)\nlibrary(reshape2)\n\nplot_calibration_map <- function(scores_set, info, legend_set, color_set, alpha=1){\n  n_lines <- length(legend_set)\n  sizes <- seq(1.5, 0.5, length.out = n_lines)\n  bins <- seq(0, 1, length.out = 11)\n  hist_tot <- hist(info$prob, breaks=bins, plot = FALSE)\n  hist_pos <- hist(info$prob[info$labels == 1], breaks=bins, plot = FALSE)\n  centers <- hist_tot$mids\n  empirical <- (hist_pos$counts+alpha) / (hist_tot$counts+2*alpha)\n\n\n  pdata <- melt(scores_set, id=\"linspace\")\n  i <- 1\n  g <- ggplot(pdata, aes(x=linspace, y=value, colour=variable))\n  for (legend in legend_set){\n    g <- g + geom_line(size=sizes[i])\n    i <- i + 1\n  }\n\n  df <- data.frame(centers, empirical)\n  d <- melt(df, id=\"centers\")\n  g <- g + geom_point(data=d, aes(x=centers, y=value, colour=variable))\n\n\n  g <- g + scale_colour_manual(values=c(color_set,'black'))\n  g <- g + labs(x=TeX(\"$s$\"),y=TeX(\"$\\\\hat{p}$\"), title=\"Calibration map\")\n  g <- g + theme(plot.title = element_text(hjust = 0.5))\n  g <- g + guides(colour = guide_legend(\"Method\"))\n  print(g)\n}\n",
+    "created" : 1487992132667.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2189024633",
+    "id" : "7C9FDE67",
+    "lastKnownWriteTime" : 1488005326,
+    "last_content_update" : 1488005327060,
+    "path" : "C:/Users/tmfilho/Dropbox/Doutorado/Bristol/2017/betacal/master/R/tutorial/calmap.r",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

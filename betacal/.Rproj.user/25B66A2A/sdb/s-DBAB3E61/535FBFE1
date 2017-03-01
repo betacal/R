@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "beta_calibration <- function(p, y, parameters=\"abm\"){\n  p <- pmax(1e-16, pmin(p, 1-1e-16))\n  if (parameters == \"abm\"){\n    d <- data.frame(y)\n    d$lp <- log(p)\n    d$l1p <- -log(1-p)\n\n    fit <- glm(y~lp+l1p,family=binomial(link='logit'),data=d)\n\n    a <- as.numeric(fit$coefficients['lp'])\n    b <- as.numeric(fit$coefficients['l1p'])\n    if (a < 0){\n      fit <- glm(y~l1p,family=binomial(link='logit'),data=d)\n      a <- 0\n      b <- as.numeric(fit$coefficients['l1p'])\n    }else if (b < 0){\n      fit <- glm(y~lp,family=binomial(link='logit'),data=d)\n      a <- as.numeric(fit$coefficients['lp'])\n      b <- 0\n    }\n    inter <- as.numeric(fit$coefficients['(Intercept)'])\n    m <- uniroot(function(mh) b*log(1-mh)-a*log(mh)-inter,c(1e-16,1-1e-16))$root\n\n    calibration <- list(\"map\" = c(a,b,m), \"model\" = fit, \"parameters\" = parameters)\n    return(calibration)\n\n  }else if (parameters == \"am\"){\n    d <- data.frame(y)\n    d$lp <- log(p / (1 - p))\n\n    fit <- glm(y~lp,family=binomial(link='logit'), data=d)\n\n    inter = as.numeric(fit$coefficients['(Intercept)'])\n    a <- as.numeric(fit$coefficients['lp'])\n    b <- a\n    m <- 1.0 / (1.0 + exp(inter / a))\n\n    calibration <- list(\"map\" = c(a,b,m), \"model\" = fit, \"parameters\" = parameters)\n    return(calibration)\n\n  }else if (parameters == \"ab\"){\n    d <- data.frame(y)\n    d$lp <- log(2 * p)\n    d$l1p <- log(2*(1-p))\n\n    fit = glm(y~lp+l1p-1,family=binomial(link='logit'), data=d)\n\n    a <- as.numeric(fit$coefficients['lp'])\n    b <- -as.numeric(fit$coefficients['l1p'])\n    m = 0.5\n\n    calibration <- list(\"map\" = c(a,b,m), \"model\" = fit, \"parameters\" = parameters)\n    return(calibration)\n  }else{\n    stop(\"Unknown parameters. Expected abm, am or ab.\")\n  }\n}\n",
+    "created" : 1487891360562.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3939027767",
+    "id" : "535FBFE1",
+    "lastKnownWriteTime" : 1487985344,
+    "last_content_update" : 1487985344772,
+    "path" : "C:/Users/tmfilho/Dropbox/Doutorado/Bristol/2017/betacal/master/R/betacal/R/beta_calibration.r",
+    "project_path" : "R/beta_calibration.r",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

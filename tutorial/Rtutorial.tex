@@ -1,0 +1,254 @@
+\documentclass[oneside]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}\usepackage{aistats2017}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{mdframed}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\aistatstitle{
+Beta calibration
+}
+
+
+\section*{Introduction}
+Logistic calibration is designed to correct for a specific kind of distortion where classifiers tend to score on too narrow a scale. However, many classifiers including Naive Bayes and standard Adaboost suffer from the opposite distortion where scores tend too much to the extremes.
+
+In this tutorial, we will motivate Beta calibration and our betacal R package.
+
+\section*{Probability estimation with Adaboost}
+First, let's train an Adaboost model with 200 decision trees to estimate class probabilities for the well-known spam dataset. The dataset will be divided into a training set (50\%), a test set (25\%) and a calibration set (25\%). The classifier will be trained on the training set and we'll estimate class probabilities for the test set.
+
+\begin{figure}[h]
+\centering
+\begin{mdframed}[userdefinedwidth=0.74\textwidth]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(fastAdaboost)}
+\hlkwd{library}\hlstd{(caret)}
+
+\hlstd{data} \hlkwb{<-} \hlkwd{read.table}\hlstd{(}\hlstr{"spambase.data"}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{","}\hlstd{)}
+\hlkwd{names}\hlstd{(data)[}\hlnum{58}\hlstd{]} \hlkwb{<-} \hlkwd{paste}\hlstd{(}\hlstr{"label"}\hlstd{)}
+
+\hlstd{data}\hlopt{$}\hlstd{label} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(data}\hlopt{$}\hlstd{label)}
+
+\hlstd{train.index} \hlkwb{<-} \hlkwd{createDataPartition}\hlstd{(data}\hlopt{$}\hlstd{label,} \hlkwc{p}\hlstd{=}\hlnum{.5}\hlstd{,} \hlkwc{list}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+\hlstd{train} \hlkwb{<-} \hlstd{data[ train.index,]}
+\hlstd{test}  \hlkwb{<-} \hlstd{data[}\hlopt{-}\hlstd{train.index,]}
+
+\hlstd{cal.index} \hlkwb{<-} \hlkwd{createDataPartition}\hlstd{(test}\hlopt{$}\hlstd{label,} \hlkwc{p}\hlstd{=}\hlnum{.5}\hlstd{,} \hlkwc{list}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+\hlstd{cal} \hlkwb{<-} \hlstd{test[ cal.index,]}
+\hlstd{test}  \hlkwb{<-} \hlstd{test[}\hlopt{-}\hlstd{cal.index,]}
+
+\hlstd{ada} \hlkwb{<-} \hlkwd{adaboost}\hlstd{(label}\hlopt{~}\hlstd{., train,} \hlnum{5}\hlstd{)}
+
+\hlstd{probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(ada,} \hlkwc{newdata}\hlstd{=test,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlstd{probas} \hlkwb{<-} \hlstd{probas}\hlopt{$}\hlstd{prob[,} \hlnum{2}\hlstd{]}
+\hlkwd{hist}\hlstd{(probas)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/intro-1} 
+
+\end{knitrout}
+\end{mdframed}
+\end{figure}
+
+\clearpage
+
+\section*{Calibrating the scores}
+We can clearly see from the histogram that the probabilities produced by the model tend to assume extreme values. Therefore, it might be useful to apply calibration techniques to try and fix these distortions. Two calibration methods have been widely used in machine learning literature: logistic calibration and isotonic regression. The first one is a parametric method that assumes an underlying distribution of the scores composed of two Gaussians of equal variance, (one for the positives and another for the negatives). The second method is a non-parametric approach, therefore it doesn't make any assumption about the distribution of the scores, however, it needs lots of data to produce a good model. Let's see the effect of applying these methods to the previously trained classifier's outputs.
+
+\begin{figure}[h]
+\centering
+\begin{mdframed}[userdefinedwidth=0.74\textwidth]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{source}\hlstd{(}\hlstr{"calmap.r"}\hlstd{)}
+\hlcom{# source("fit.isoreg.r")}
+
+\hlstd{cal_probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(ada,} \hlkwc{newdata}\hlstd{=cal,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlstd{cal_probas} \hlkwb{<-} \hlstd{cal_probas}\hlopt{$}\hlstd{prob[,} \hlnum{2}\hlstd{]}
+
+\hlkwd{hist}\hlstd{(cal_probas[cal}\hlopt{$}\hlstd{label}\hlopt{==}\hlnum{1}\hlstd{])}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/calib_ada-1} 
+\begin{kframe}\begin{alltt}
+\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=cal_probas,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+
+\hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
+
+\hlcom{#Eliminating duplicated scores to train the isotonic regression}
+\hlcom{# idx <- duplicated(cal_probas)}
+\hlcom{# Y.calib.pred.unique <- cal_probas[!idx]}
+\hlcom{# Y.calib.unique <- cal$label[!idx]}
+\hlcom{#}
+\hlcom{# iso <- isoreg(Y.calib.pred.unique, Y.calib.unique)}
+
+\hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
+\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
+\hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlcom{# isotonic <- fit.isoreg(iso, linspace)}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic)}\hlcom{#, isotonic)}
+\hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=cal_probas,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{)}\hlcom{#, "isotonic")}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{)}\hlcom{#, "blue")}
+\hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/calib_ada-2} 
+
+\end{knitrout}
+\end{mdframed}
+\end{figure}
+
+\clearpage
+
+\section*{Calibration map}
+In the calibration map shown above, we can see that:
+
+\begin{itemize}
+    \item Logistic calibration fit the scores in the first and last bins well, but was either underconfident or overconfident in the rest of the map, due to the limitations of its shape
+    \item As a non-parametric method, Isotonic regression managed to fit the scores better than Logistic calibration by finding an inverted sigmoid shape
+\end{itemize}
+
+\section*{Fitting a beta calibration model with the betacal package}
+
+Our beta calibration is a parametric method which is able to circumvent logistic calibration's shape limitations by fitting three parameters, i.e. two for shape (a and b) and one for location (m). These parameters can be fitted by training a logistic regression model with two features extracted from the classifier's probability outputs. Beta calibration is adequate for calibrating probabilities, because the beta distribution has support [0, 1], while logistic calibration assumes the scores are distributed in two gaussians, which have infinite support.
+
+To make it easy for practitioners to fit a beta calibration model, we have provided a Python package called betacal. The package can be installed via pip (pip install betacal). Below, we show how to use the package to fit the three-parameter version of beta calibration. For the other two versions, the practitioner can set parameters="ab" (fit shape parameters a and b and fix location parameter m = 0.5) or parameters="am" (fit shape parameter a, setting a = b, and fit location parameter m).
+
+\begin{figure}[h]
+\centering
+\begin{mdframed}[userdefinedwidth=0.74\textwidth]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(}\hlstr{"betacal"}\hlstd{)}
+
+\hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(cal_probas, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
+
+\hlstd{beta} \hlkwb{<-} \hlkwd{beta_predict}\hlstd{(linspace, bc)}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta)}\hlcom{#, isotonic)}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{)}\hlcom{#, "isotonic")}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{)}\hlcom{#, "blue")}
+\hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/beta_ada-1} 
+
+\end{knitrout}
+\end{mdframed}
+\end{figure}
+
+Beta calibration was able to find the inverted sigmoid shape, as isotonic regression did, resulting in a much better fit for the scores than logistic calibration. Now let's see what happens when a classifier outputs probabilities that tend to be concentrated around mean values.
+
+\clearpage
+
+\section*{Probability estimation with logistic regression}
+
+Below, we train a logistic regression using the same spam dataset. We can see that its probability outputs are concentrated around 0.5. This distortion is what logistic calibration works on best.
+
+\begin{figure}[h]
+\centering
+\begin{mdframed}[userdefinedwidth=0.74\textwidth]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{lrc} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),}\hlkwc{data}\hlstd{=train)}
+
+\hlstd{probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lrc,} \hlkwc{newdata}\hlstd{=test,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+
+\hlkwd{hist}\hlstd{(probas)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/intro_lrc-1} 
+
+\end{knitrout}
+\end{mdframed}
+\end{figure}
+
+Now let's train the calibration models.
+
+
+\begin{figure}[h]
+\centering
+\begin{mdframed}[userdefinedwidth=0.74\textwidth]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{cal_probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lrc,} \hlkwc{newdata}\hlstd{=cal,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=cal_probas,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+\hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
+\hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
+\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
+\hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(cal_probas, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
+\hlstd{beta} \hlkwb{<-} \hlkwd{beta_predict}\hlstd{(linspace, bc)}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta)}\hlcom{#, isotonic)}
+\hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=cal_probas,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{)}\hlcom{#, "isotonic")}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{)}\hlcom{#, "blue")}
+\hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/calib_lrc-1} 
+
+\end{knitrout}
+\end{mdframed}
+\end{figure}
+\clearpage
+Notice how all three methods find sigmoid shapes. This is because the sigmoid shape is part of the beta calibration family, which also contains an identity calibration map, which just keeps the scores with their original values (this is not possible with logistic calibration). In both maps, isotonic regression did a great job fitting the scores, but as a non-parametric method, it needs a lot of data to train (as is the case with the spam dataset), which is not a problem for beta calibration. Therefore, given that beta calibration is able to fit the classifier's output probabilities better than or at least equal to logistic calibration, we argue that a practicioner who wants to use a parametric calibration method should choose beta calibration.
+
+\end{document}
