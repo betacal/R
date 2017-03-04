@@ -66,7 +66,7 @@ Logistic calibration is designed to correct for a specific kind of distortion wh
 In this tutorial, we will motivate Beta calibration and our betacal R package.
 
 \section*{Probability estimation with Adaboost}
-First, let's train an Adaboost model with 200 decision trees to estimate class probabilities for the well-known spam dataset. The dataset will be divided into a training set (50\%), a test set (25\%) and a calibration set (25\%). The classifier will be trained on the training set and we'll estimate class probabilities for the test set.
+First, let's train an Adaboost model with 100 decision stumps to estimate class probabilities for the well-known spam dataset. The dataset will be divided into a training set (50\%), a test set (25\%) and a calibration set (25\%). The classifier will be trained on the training set and we'll estimate class probabilities for the test set.
 
 \begin{figure}[h]
 \centering
@@ -74,26 +74,19 @@ First, let's train an Adaboost model with 200 decision trees to estimate class p
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(fastAdaboost)}
+\hlkwd{source}\hlstd{(}\hlstr{"adaboost.R"}\hlstd{)}
 \hlkwd{library}\hlstd{(caret)}
 
 \hlstd{data} \hlkwb{<-} \hlkwd{read.table}\hlstd{(}\hlstr{"spambase.data"}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{","}\hlstd{)}
 \hlkwd{names}\hlstd{(data)[}\hlnum{58}\hlstd{]} \hlkwb{<-} \hlkwd{paste}\hlstd{(}\hlstr{"label"}\hlstd{)}
-
-\hlstd{data}\hlopt{$}\hlstd{label} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(data}\hlopt{$}\hlstd{label)}
-
 \hlstd{train.index} \hlkwb{<-} \hlkwd{createDataPartition}\hlstd{(data}\hlopt{$}\hlstd{label,} \hlkwc{p}\hlstd{=}\hlnum{.5}\hlstd{,} \hlkwc{list}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \hlstd{train} \hlkwb{<-} \hlstd{data[ train.index,]}
 \hlstd{test}  \hlkwb{<-} \hlstd{data[}\hlopt{-}\hlstd{train.index,]}
-
 \hlstd{cal.index} \hlkwb{<-} \hlkwd{createDataPartition}\hlstd{(test}\hlopt{$}\hlstd{label,} \hlkwc{p}\hlstd{=}\hlnum{.5}\hlstd{,} \hlkwc{list}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \hlstd{cal} \hlkwb{<-} \hlstd{test[ cal.index,]}
 \hlstd{test}  \hlkwb{<-} \hlstd{test[}\hlopt{-}\hlstd{cal.index,]}
-
-\hlstd{ada} \hlkwb{<-} \hlkwd{adaboost}\hlstd{(label}\hlopt{~}\hlstd{., train,} \hlnum{5}\hlstd{)}
-
-\hlstd{probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(ada,} \hlkwc{newdata}\hlstd{=test,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-\hlstd{probas} \hlkwb{<-} \hlstd{probas}\hlopt{$}\hlstd{prob[,} \hlnum{2}\hlstd{]}
+\hlstd{ada} \hlkwb{<-} \hlkwd{train.adaboost}\hlstd{(train,} \hlnum{100}\hlstd{)}
+\hlstd{probas} \hlkwb{<-} \hlkwd{predict.adaboost}\hlstd{(test, ada)[,}\hlnum{2}\hlstd{]}
 \hlkwd{hist}\hlstd{(probas)}
 \end{alltt}
 \end{kframe}
@@ -117,25 +110,15 @@ We can clearly see from the histogram that the probabilities produced by the mod
 \hlkwd{source}\hlstd{(}\hlstr{"calmap.r"}\hlstd{)}
 \hlcom{# source("fit.isoreg.r")}
 
-\hlstd{cal_probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(ada,} \hlkwc{newdata}\hlstd{=cal,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-\hlstd{cal_probas} \hlkwb{<-} \hlstd{cal_probas}\hlopt{$}\hlstd{prob[,} \hlnum{2}\hlstd{]}
-
-\hlkwd{hist}\hlstd{(cal_probas[cal}\hlopt{$}\hlstd{label}\hlopt{==}\hlnum{1}\hlstd{])}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/calib_ada-1} 
-\begin{kframe}\begin{alltt}
+\hlstd{cal_probas} \hlkwb{<-} \hlkwd{predict.adaboost}\hlstd{(cal, ada)[,}\hlnum{2}\hlstd{]}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=cal_probas,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
-
 \hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
-
 \hlcom{#Eliminating duplicated scores to train the isotonic regression}
 \hlcom{# idx <- duplicated(cal_probas)}
 \hlcom{# Y.calib.pred.unique <- cal_probas[!idx]}
 \hlcom{# Y.calib.unique <- cal$label[!idx]}
 \hlcom{#}
 \hlcom{# iso <- isoreg(Y.calib.pred.unique, Y.calib.unique)}
-
 \hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
 \hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
@@ -147,7 +130,7 @@ We can clearly see from the histogram that the probabilities produced by the mod
 \hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/calib_ada-2} 
+\includegraphics[width=\maxwidth]{figure/calib_ada-1} 
 
 \end{knitrout}
 \end{mdframed}
@@ -198,7 +181,7 @@ Beta calibration was able to find the inverted sigmoid shape, as isotonic regres
 
 \section*{Probability estimation with logistic regression}
 
-Below, we train a logistic regression using the same spam dataset. We can see that its probability outputs are concentrated around 0.5. This distortion is what logistic calibration works on best.
+Below, we train a logistic regression using the same spam dataset. We can see that its probability outputs are concentrated around 0.3. This distortion (score concentration) is what logistic calibration works on best.
 
 \begin{figure}[h]
 \centering
@@ -206,11 +189,11 @@ Below, we train a logistic regression using the same spam dataset. We can see th
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{lrc} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),}\hlkwc{data}\hlstd{=train)}
-
-\hlstd{probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lrc,} \hlkwc{newdata}\hlstd{=test,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-
-\hlkwd{hist}\hlstd{(probas)}
+\hlkwd{library}\hlstd{(glmnet)}
+\hlstd{x} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(train[,}\hlnum{1}\hlopt{:}\hlnum{57}\hlstd{])}
+\hlstd{lrc} \hlkwb{<-} \hlkwd{glmnet}\hlstd{(x, train}\hlopt{$}\hlstd{label,} \hlkwc{family}\hlstd{=}\hlstr{"binomial"}\hlstd{,} \hlkwc{nlambda} \hlstd{=} \hlnum{10}\hlstd{)}
+\hlstd{newx} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(test[,}\hlnum{1}\hlopt{:}\hlnum{57}\hlstd{])}
+\hlkwd{hist}\hlstd{(}\hlkwd{predict}\hlstd{(lrc,} \hlkwc{newx}\hlstd{=newx,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{)[,}\hlnum{2}\hlstd{],} \hlkwc{xlim} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{))}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/intro_lrc-1} 
@@ -228,16 +211,16 @@ Now let's train the calibration models.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{cal_probas} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lrc,} \hlkwc{newdata}\hlstd{=cal,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=cal_probas,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+\hlstd{c_prob}\hlkwb{<-}\hlkwd{predict}\hlstd{(lrc,}\hlkwc{newx}\hlstd{=}\hlkwd{as.matrix}\hlstd{(cal[,}\hlnum{1}\hlopt{:}\hlnum{57}\hlstd{]),}\hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{)[,}\hlnum{2}\hlstd{]}
+\hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=c_prob,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
 \hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
 \hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
 \hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-\hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(cal_probas, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
+\hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(c_prob, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
 \hlstd{beta} \hlkwb{<-} \hlkwd{beta_predict}\hlstd{(linspace, bc)}
 \hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta)}\hlcom{#, isotonic)}
-\hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=cal_probas,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
+\hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=c_prob,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
 \hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{)}\hlcom{#, "isotonic")}
 \hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{)}\hlcom{#, "blue")}
 \hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}

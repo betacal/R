@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.7.20)  1 MAR 2017 11:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.7.20)  4 MAR 2017 19:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -651,12 +651,12 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 <figure/intro-1.pdf, id=1, 867.24pt x 289.08pt>
 File: figure/intro-1.pdf Graphic file (type pdf)
  <use figure/intro-1.pdf>
-Package pdftex.def Info: figure/intro-1.pdf used on input line 100.
+Package pdftex.def Info: figure/intro-1.pdf used on input line 93.
 (pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 103.
+ mdframed uses option nobreak mdframed on input line 96.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 103.
+ mdframed uses option nobreak mdframed on input line 96.
 
 [1
 
@@ -664,89 +664,86 @@ Package mdframed Info: mdframed inside a box
 {c:/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
  <./figure/intro-1.pdf>]
-Package color Info: Redefining color shadecolor on input line 115.
+Package color Info: Redefining color shadecolor on input line 108.
  <figure/calib_ada-1.pdf, id=16, 867.24pt x 289.08pt>
 File: figure/calib_ada-1.pdf Graphic file (type pdf)
 
 <use figure/calib_ada-1.pdf>
-Package pdftex.def Info: figure/calib_ada-1.pdf used on input line 126.
-(pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
-
-<figure/calib_ada-2.pdf, id=17, 867.24pt x 289.08pt>
-File: figure/calib_ada-2.pdf Graphic file (type pdf)
-
-<use figure/calib_ada-2.pdf>
-Package pdftex.def Info: figure/calib_ada-2.pdf used on input line 150.
+Package pdftex.def Info: figure/calib_ada-1.pdf used on input line 133.
 (pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 153.
+ mdframed uses option nobreak mdframed on input line 136.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 153.
+ mdframed uses option nobreak mdframed on input line 136.
+ [2
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[2
-
- <./figure/calib_ada-1.pdf> <./figure/calib_ada-2.pdf>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 162.
+ <./figure/calib_ada-1.pdf>]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 145.
 
 
 (c:/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 162.
-Package color Info: Redefining color shadecolor on input line 176.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 145.
+Package color Info: Redefining color shadecolor on input line 159.
 
-Overfull \hbox (1.0557pt too wide) in paragraph at lines 180--180
+Overfull \hbox (1.0557pt too wide) in paragraph at lines 163--163
 [][]\OT1/cmtt/m/n/10 bc[] []<-[] []beta_calibration[][](cal_probas, cal[][]$[][
 ]label,[] []parameters[] []=[] []"abm"[][])[][] 
  []
 
-<figure/beta_ada-1.pdf, id=33, 867.24pt x 289.08pt>
+<figure/beta_ada-1.pdf, id=26, 867.24pt x 289.08pt>
 File: figure/beta_ada-1.pdf Graphic file (type pdf)
 
 <use figure/beta_ada-1.pdf>
-Package pdftex.def Info: figure/beta_ada-1.pdf used on input line 189.
+Package pdftex.def Info: figure/beta_ada-1.pdf used on input line 172.
 (pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 192.
+ mdframed uses option nobreak mdframed on input line 175.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 192.
+ mdframed uses option nobreak mdframed on input line 175.
  [3
 
 
  <./figure/beta_ada-1.pdf>]
-Package color Info: Redefining color shadecolor on input line 207.
+Package color Info: Redefining color shadecolor on input line 190.
 
-<figure/intro_lrc-1.pdf, id=43, 867.24pt x 289.08pt>
+Overfull \hbox (1.0557pt too wide) in paragraph at lines 196--196
+[][]\OT1/cmtt/m/n/10 hist[][]([][]predict[][](lrc,[] []newx[][]=newx,[] []type[
+][]=[][]"response"[][])[,[][]2[][]],[] []xlim[] []=[] []c[][]([][]0[][],[][]1[]
+[]))[][] 
+ []
+
+<figure/intro_lrc-1.pdf, id=36, 867.24pt x 289.08pt>
 File: figure/intro_lrc-1.pdf Graphic file (type pdf)
 
 <use figure/intro_lrc-1.pdf>
-Package pdftex.def Info: figure/intro_lrc-1.pdf used on input line 216.
+Package pdftex.def Info: figure/intro_lrc-1.pdf used on input line 199.
 (pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 219.
+ mdframed uses option nobreak mdframed on input line 202.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 219.
-Package color Info: Redefining color shadecolor on input line 229.
+ mdframed uses option nobreak mdframed on input line 202.
+Package color Info: Redefining color shadecolor on input line 212.
 
-Overfull \hbox (1.0557pt too wide) in paragraph at lines 237--237
-[][]\OT1/cmtt/m/n/10 bc[] []<-[] []beta_calibration[][](cal_probas, cal[][]$[][
-]label,[] []parameters[] []=[] []"abm"[][])[][] 
+Overfull \hbox (11.5556pt too wide) in paragraph at lines 214--214
+[][]\OT1/cmtt/m/n/10 c_prob[][]<-[][]predict[][](lrc,[][]newx[][]=[][]as.matrix
+[][](cal[,[][]1[][]:[][]57[][]]),[][]type[][]=[][]"response"[][])[,[][]2[][]][]
+[] 
  []
 
-<figure/calib_lrc-1.pdf, id=44, 867.24pt x 289.08pt>
+<figure/calib_lrc-1.pdf, id=37, 867.24pt x 289.08pt>
 File: figure/calib_lrc-1.pdf Graphic file (type pdf)
 
 <use figure/calib_lrc-1.pdf>
-Package pdftex.def Info: figure/calib_lrc-1.pdf used on input line 246.
+Package pdftex.def Info: figure/calib_lrc-1.pdf used on input line 229.
 (pdftex.def)             Requested size: 340.19133pt x 113.39798pt.
 Package mdframed Info: mdframed inside float 
- mdframed uses option nobreak mdframed on input line 249.
+ mdframed uses option nobreak mdframed on input line 232.
 Package mdframed Info: mdframed inside a box 
- mdframed uses option nobreak mdframed on input line 249.
+ mdframed uses option nobreak mdframed on input line 232.
  [4
 
 
@@ -755,10 +752,10 @@ Package mdframed Info: mdframed inside a box
 
 ] (./Rtutorial.aux) ) 
 Here is how much of TeX's memory you used:
- 9186 strings out of 493093
- 171360 string characters out of 6138556
+ 9181 strings out of 493093
+ 171238 string characters out of 6138556
  228303 words of memory out of 5000000
- 12593 multiletter control sequences out of 15000+600000
+ 12589 multiletter control sequences out of 15000+600000
  5793 words of font info for 22 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  45i,11n,45p,10450b,466s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -767,10 +764,10 @@ Here is how much of TeX's memory you used:
 pfb><c:/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Rtutorial.pdf (5 pages, 101761 bytes).
+Output written on Rtutorial.pdf (5 pages, 98647 bytes).
 PDF statistics:
- 79 PDF objects out of 1000 (max. 8388607)
- 54 compressed objects within 1 object stream
+ 72 PDF objects out of 1000 (max. 8388607)
+ 49 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 31 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 26 words of extra memory for PDF output out of 10000 (max. 10000000)
 
