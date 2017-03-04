@@ -108,25 +108,25 @@ We can clearly see from the histogram that the probabilities produced by the mod
 \definecolor{shadecolor}{rgb}{1, 1, 1}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{source}\hlstd{(}\hlstr{"calmap.r"}\hlstd{)}
-\hlcom{# source("fit.isoreg.r")}
+\hlkwd{source}\hlstd{(}\hlstr{"fit.isoreg.r"}\hlstd{)}
 
 \hlstd{cal_probas} \hlkwb{<-} \hlkwd{predict.adaboost}\hlstd{(cal, ada)[,}\hlnum{2}\hlstd{]}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=cal_probas,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
 \hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
 \hlcom{#Eliminating duplicated scores to train the isotonic regression}
-\hlcom{# idx <- duplicated(cal_probas)}
-\hlcom{# Y.calib.pred.unique <- cal_probas[!idx]}
-\hlcom{# Y.calib.unique <- cal$label[!idx]}
+\hlstd{idx} \hlkwb{<-} \hlkwd{duplicated}\hlstd{(cal_probas)}
+\hlstd{Y.calib.pred.unique} \hlkwb{<-} \hlstd{cal_probas[}\hlopt{!}\hlstd{idx]}
+\hlstd{Y.calib.unique} \hlkwb{<-} \hlstd{cal}\hlopt{$}\hlstd{label[}\hlopt{!}\hlstd{idx]}
 \hlcom{#}
-\hlcom{# iso <- isoreg(Y.calib.pred.unique, Y.calib.unique)}
-\hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
+\hlstd{iso} \hlkwb{<-} \hlkwd{isoreg}\hlstd{(Y.calib.pred.unique, Y.calib.unique)}
+\hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{1000}\hlstd{)}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
 \hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
-\hlcom{# isotonic <- fit.isoreg(iso, linspace)}
-\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic)}\hlcom{#, isotonic)}
+\hlstd{isotonic} \hlkwb{<-} \hlkwd{fit.isoreg}\hlstd{(iso, linspace)}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, isotonic)}
 \hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=cal_probas,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
-\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{)}\hlcom{#, "isotonic")}
-\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{)}\hlcom{#, "blue")}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"isotonic"}\hlstd{)}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"blue"}\hlstd{)}
 \hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -163,9 +163,9 @@ To make it easy for practitioners to fit a beta calibration model, we have provi
 \hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(cal_probas, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
 
 \hlstd{beta} \hlkwb{<-} \hlkwd{beta_predict}\hlstd{(linspace, bc)}
-\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta)}\hlcom{#, isotonic)}
-\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{)}\hlcom{#, "isotonic")}
-\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{)}\hlcom{#, "blue")}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta, isotonic)}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{,} \hlstr{"isotonic"}\hlstd{)}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{,} \hlstr{"blue"}\hlstd{)}
 \hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
@@ -201,6 +201,7 @@ Below, we train a logistic regression using the same spam dataset. We can see th
 \end{knitrout}
 \end{mdframed}
 \end{figure}
+\clearpage
 
 Now let's train the calibration models.
 
@@ -214,15 +215,22 @@ Now let's train the calibration models.
 \hlstd{c_prob}\hlkwb{<-}\hlkwd{predict}\hlstd{(lrc,}\hlkwc{newx}\hlstd{=}\hlkwd{as.matrix}\hlstd{(cal[,}\hlnum{1}\hlopt{:}\hlnum{57}\hlstd{]),}\hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{)[,}\hlnum{2}\hlstd{]}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=c_prob,} \hlstr{"label"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
 \hlstd{lr} \hlkwb{<-} \hlkwd{glm}\hlstd{(label}\hlopt{~}\hlstd{.,}\hlkwc{family}\hlstd{=}\hlkwd{binomial}\hlstd{(}\hlkwc{link}\hlstd{=}\hlstr{'logit'}\hlstd{),} \hlkwc{data}\hlstd{=d)}
+\hlcom{#Eliminating duplicated scores to train the isotonic regression}
+\hlstd{idx} \hlkwb{<-} \hlkwd{duplicated}\hlstd{(c_prob)}
+\hlstd{Y.calib.pred.unique} \hlkwb{<-} \hlstd{c_prob[}\hlopt{!}\hlstd{idx]}
+\hlstd{Y.calib.unique} \hlkwb{<-} \hlstd{cal}\hlopt{$}\hlstd{label[}\hlopt{!}\hlstd{idx]}
+\hlcom{#}
+\hlstd{iso} \hlkwb{<-} \hlkwd{isoreg}\hlstd{(Y.calib.pred.unique, Y.calib.unique)}
 \hlstd{linspace} \hlkwb{<-} \hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{100}\hlstd{)}
 \hlstd{d} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"p"}\hlstd{=linspace)}
 \hlstd{logistic} \hlkwb{<-} \hlstd{(}\hlkwd{predict}\hlstd{(lr,} \hlkwc{newdata}\hlstd{=d,} \hlkwc{type}\hlstd{=}\hlstr{"response"}\hlstd{))}
+\hlstd{isotonic} \hlkwb{<-} \hlkwd{fit.isoreg}\hlstd{(iso, linspace)}
 \hlstd{bc} \hlkwb{<-} \hlkwd{beta_calibration}\hlstd{(c_prob, cal}\hlopt{$}\hlstd{label,} \hlkwc{parameters} \hlstd{=} \hlstr{"abm"}\hlstd{)}
 \hlstd{beta} \hlkwb{<-} \hlkwd{beta_predict}\hlstd{(linspace, bc)}
-\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta)}\hlcom{#, isotonic)}
+\hlstd{s_set} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(linspace, logistic, beta, isotonic)}
 \hlstd{info} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlstr{"prob"}\hlstd{=c_prob,} \hlstr{"labels"}\hlstd{=cal}\hlopt{$}\hlstd{label)}
-\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{)}\hlcom{#, "isotonic")}
-\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{)}\hlcom{#, "blue")}
+\hlstd{l_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"logistic"}\hlstd{,} \hlstr{"beta"}\hlstd{,} \hlstr{"isotonic"}\hlstd{)}
+\hlstd{c_set} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"red"}\hlstd{,} \hlstr{"green"}\hlstd{,} \hlstr{"blue"}\hlstd{)}
 \hlkwd{plot_calibration_map}\hlstd{(s_set, info, l_set, c_set,} \hlkwc{alpha}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
